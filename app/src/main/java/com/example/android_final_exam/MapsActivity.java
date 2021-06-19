@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.android_final_exam.databinding.ActivityMapsBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -33,7 +34,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LocationManager locationManager;
     LocationListener locationListener;
-    List<LatLng> locationList;
+    List<LatLng> locationList = new ArrayList<>();
+
+    LatLng latLng = new LatLng(20,40);
 
     public static final String TAG = "Location exercise";
     public static final int REQUEST_CODE = 1;
@@ -51,44 +54,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE); // In android, we can get any service by using getSystemService method
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                Log.d(TAG, "On location changed: " + location);
-            }
-        };
-
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
-
-        databaseHelper = new DatabaseHelper(this);
-
-    }
-
-    private void loadLocations() {
-        Cursor cursor = databaseHelper.getAllLocations();
-        if (cursor.moveToFirst()) {
-            do {
-                locationList.add(new LatLng(
-                        cursor.getDouble(0),
-                        cursor.getDouble(1)
-                ));
-            } while (cursor.moveToNext());
-            cursor.close();
-        }
-
-        showMarkers();
-    }
-
-    private void showMarkers() {
-        Log.d(TAG, "showMarkers: " + locationList);
-        for(LatLng latLng: locationList){
-            MarkerOptions newMarker = new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-            mMap.addMarker(newMarker);
-        }
-
-
     }
 
     /**
@@ -104,10 +69,50 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE); // In android, we can get any service by using getSystemService method
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                Log.d(TAG, "On location changed: " + location);
+            }
+        };
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+
+        databaseHelper = new DatabaseHelper(this);
+    }
+
+    private void loadLocations() {
+        Cursor cursor = databaseHelper.getAllLocations();
+        if (cursor.moveToFirst()) {
+            do {
+
+                Double lati = cursor.getDouble(0);
+                Double longi = cursor.getDouble(1);
+
+                Log.d(TAG, "loadLocations: "+lati);
+                Log.d(TAG, "loadLocations: "+longi);
+
+                LatLng location = new LatLng(lati, longi);
+
+                locationList.add(location);
+
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        showMarkers();
+    }
+
+    private void showMarkers() {
+        Log.d(TAG, "showMarkers: " + locationList);
+        for(LatLng latLng: locationList){
+            MarkerOptions newMarker = new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+            mMap.addMarker(newMarker);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,10));
+        }
+
+
     }
 
     @Override

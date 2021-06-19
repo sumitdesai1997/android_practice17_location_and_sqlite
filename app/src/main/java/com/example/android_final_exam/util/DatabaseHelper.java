@@ -27,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String sql = "CREATE TABLE " + TABLE_NAME + "(" +
-                COLUMN_ID+ " INTEGER NOT NULL CONSTRAINT location_pk PRIMARY KEY AUTOINCREMENT, " +
+                //COLUMN_ID+ " INTEGER NOT NULL CONSTRAINT location_pk PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_LATITUDE+ " DOUBLE NOT NULL, " +
                 COLUMN_LONGITUDE+ " DOUBLE NOT NULL, " +
                 COLUMN_ADDRESS+ " VARCHAR(50) NOT NULL);";
